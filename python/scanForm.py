@@ -14,7 +14,7 @@ newBound = [[0,0],[1000,0],[0,500],[1000,500]]
 #img = cv2.imread("testingDocument.png")
 #img = cv2.imread("tracedSample1.jpg")
 #img = cv2.imread("BlackAdditionSample.png")
-img = cv2.imread("../scannedFiles/goodScan.jpg")
+img = cv2.imread("./goodScan.jpg")
 
 
 
@@ -70,8 +70,8 @@ con = cv2.drawContours(con, page, -1, (0, 255, 255), 3)
 
 
 closing = cv2.morphologyEx(con, cv2.MORPH_CLOSE, (25,25),iterations=5)
-plt.imshow(closing, cmap = "binary")
-plt.show()
+# plt.imshow(closing, cmap = "binary")
+# plt.show()
 
 # Blank canvas.
 con = np.zeros_like(img)
@@ -122,15 +122,15 @@ maxHeight = max(int(heightA), int(heightB))
 # Final destination co-ordinates.
 destination_corners = [[0, 0], [maxWidth, 0], [maxWidth, maxHeight], [0, maxHeight]]
 
-print (pts)
-print(destination_corners)
+# print (pts)
+# print(destination_corners)
 # Getting the homography.
 M = cv2.getPerspectiveTransform(np.float32(pts), np.float32(destination_corners))
 # Perspective transform using homography.
 fimg = cv2.warpPerspective(img, M, (maxWidth,maxHeight), flags=cv2.INTER_LINEAR)
 
-plt.imshow(fimg)
-plt.show()
+# plt.imshow(fimg)
+# plt.show()
 #transform the tilted picture to the straightened rider
 # M = cv2.getPerspectiveTransform(np.float32(corners),np.float32(newBound))
 # fimg = cv2.warpPerspective(img,M,(500,1000))
@@ -149,8 +149,8 @@ detected_lines = cv2.dilate(detected_lines, (1,25), iterations=5)
 #remove lines that are straight and long
 cnts, hierarchy = cv2.findContours(detected_lines, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-plt.imshow(detected_lines)
-plt.show()
+# plt.imshow(detected_lines)
+# plt.show()
 
 section = [0]
 for c in cnts:
@@ -158,10 +158,8 @@ for c in cnts:
     #print(cv2.contourArea(c))
     if(cv2.contourArea(c) < maxHeight*8):
         section.append(c[0,0,0])
-        print(c[0,0,0])
 
 section = sorted(section)
-print(section)
 
 # cnts, hierarchy = cv2.findContours(temp, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -192,9 +190,7 @@ for t in range(len(section)-1):
 
     pts = [ [section[t],0],[section[t],maxHeight],[section[t+1],maxHeight],[section[t+1],0] ]
 
-    print(pts)
     newBound = [ [0,0],[0,2000],[1000,2000],[1000,0] ]
-    print(newBound)
 
     M = cv2.getPerspectiveTransform(np.float32(pts), np.float32(newBound))
     # Perspective transform using homography.
@@ -210,7 +206,8 @@ for t in range(len(section)-1):
     boxSize = [200,50]
 
     res = cv2.cvtColor(finalimg,cv2.COLOR_BGR2GRAY)
-    ret,th = cv2.threshold(res, 150, 200, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    res = np.invert(res)
+    ret,th = cv2.threshold(res, 50, 0, cv2.THRESH_TOZERO + cv2.THRESH_OTSU)
 
 
     i = 0
@@ -228,18 +225,16 @@ for t in range(len(section)-1):
         #finds n many numbers inside of box
         for c in sortcontours:
             if cv2.contourArea(c) > 200:
-                print(c)
                 x,y,w,h = cv2.boundingRect(c)
-                print(temp.shape)
-                finalimg = temp[y:y+h,x:x+w]
+                finalimg = th[y:y+h,x:x+w]
                 finalimg = np.pad(finalimg,pad_width=5,mode='constant',constant_values=0)
-                
-                plt.imshow(finalimg , cmap = 'binary')
-                plt.show()
+                #finalimg = np.invert(finalimg)
                 #makes image MNIST size
                 finalimg = cv2.resize(finalimg,(28,28))
+                plt.imshow(finalimg , cmap = 'binary')
+                plt.show()
                 #invert because otherwise text is white and background is black
-                finalimg = np.invert(finalimg)
+                
                 cv2.imwrite('./generated/img'+str(i)+'.png',finalimg)
                 i+=1
         
