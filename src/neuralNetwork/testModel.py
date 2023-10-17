@@ -10,7 +10,7 @@ from PIL import Image
 import numeralRecognition
 
 # load image
-img = Image.open("IOS-Score-Card/src/neuralNetwork/tests/six1.bmp")
+img = Image.open("IOS-Score-Card/src/neuralNetwork/tests/img10.png")
 img = img.convert("L")
 
 model = numeralRecognition.CNN()
