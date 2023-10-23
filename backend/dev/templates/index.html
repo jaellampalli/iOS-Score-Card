@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="../static/htmx.min.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Inter&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto+Flex&display=swap"
+      rel="stylesheet"
+    />
+    <link href="../static/styles.css" rel="stylesheet" />
+    <title>SEDRA Scorecard Scanner</title>
+  </head>
+  <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <header class="banner">
+      <div class="logoNtitle">
+        <img class="img1" src="../static/images/SEDRA.png" />
+        <p>Scorecard<br />Scanner</p>
+      </div>
+      <div class="link-container">
+        <a class="link" href="https://www.distanceriding.org/">Home</a>
+        <a class="link" href="https://www.distanceriding.org/">How It Works</a>
+        <a class="link" href="https://www.distanceriding.org/">About Us</a>
+      </div>
+      <div class="button-container">
+        <button
+          onclick=" let t = body.classList.toggle('dark-mode');
+                    if(t) this.textContent='Light Mode'; 
+                    else this.textContent='Dark Mode'"
+          id="light-dark"
+          style="border-radius: 10px"
+          ;
+        >
+          Dark Mode
+        </button>
+      </div>
+    </header>
+    <br />
+    <div class="miniheader">Have a SEDRA or AERC Scorecard to upload?</div>
+    <br />
+    <div class="miniheader">Upload or snap a photo of it below!</div>
+    <br /><br />
+
+    <div style="margin: auto; width: 50%; text-align: center">
+      <a
+        href="#sedraImage"
+        onclick="document.querySelector('.overlay').showModal()"
+        >South Eastern Distance Riders Association Scorecard Example</a
+      >
+      <br />
+      <a
+        href="#aercImage"
+        onclick="document.querySelector('.overlay').showModal()"
+        >American Endurance Ride Conference Evaluation Example</a
+      >
+    </div>
+    <dialog class="overlay" onclick="this.close()">
+      <img
+        id="sedraImage"
+        class="popupImg"
+        src="../static/images/SEDRAcard.png"
+      />
+      <img
+        id="aercImage"
+        class="popupImg"
+        src="../static/images/AERCcard.png"
+      />
+    </dialog>
+    <br />
+    <div class="filebox-container">
+      <div class="filebox">
+        <div
+          id="drop-zone"
+          class="dottedfill"
+          hx-trigger="drop"
+          hx-post="/upload"
+          ondrop="event.preventDefault();
+          const files = document.querySelector('#files');
+          files.files = event.dataTransfer.files; 
+          console.log(files);
+          const ul = document.querySelector('.fileList'); 
+          ul.innerHTML ='';
+          for(const f of event.dataTransfer.files){ul.innerHTML += '<li>'+f.name+'</li>';};"
+          ondragover="event.preventDefault()"
+        >
+          <a class="filedrop">Drag Your Files Here!</a>
+        </div>
+        <a class="or">Or</a>
+        <ul id="file-list"></ul>
+        <!-- TODO: Convert to Django Form -->
+        <form
+          id="file-upload"
+          hx-encoding="multipart/form-data"
+          hx-post="/dev/endpoint"
+        >
+          <label for="files"></label>
+          <ul class="fileList"></ul>
+          <button
+            type="button"
+            id="uploadButton"
+            onclick="this.children[0].click()"
+          >
+            Upload Files
+            
+            <input
+              id="files"
+              oninput=" const ul = document.querySelector('.fileList'); 
+                        ul.innerHTML ='';
+                        for(const f of event.target.files){ul.innerHTML += '<li>'+f.name+'</li>';}"
+              type="file"
+              accept="image/*"
+              multiple
+              name="files"
+              style="display: none; margin: auto"
+            />
+          </button>
+          <button id="uploadButton">Submit</button>
+        </form>
+        <button id="photoButton">Take a Photo</button>
+        <div id="camera-modal" class="modal">
+          <div class="modal-content">
+            <h2>Camera</h2>
+            <video id="camera-feed" autoplay></video>
+            <button id="close-camera">Close</button>
+            <button id="take-photo">Take Photo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // const toggleDark = document.getElementById('light-dark');
+      // const body = document.body;
+      // //checks for click on light mode button
+      // toggleDark.addEventListener('click', () => {
+      //     body.classList.toggle('dark-mode');
+      //     updateText();
+      // });
+      // //updates button text based on light mode
+      // function updateText() {
+      //     const currentText = body.classList.contains('dark-mode') ? 'Light Mode' : 'Dark Mode';
+      //     toggleDark.textContent = currentText;
+      // }
+      //links each image and text to JS variables
+      // const sedraTextElement = document.getElementById("sedraText");
+      // const sedraImageElement = document.getElementById("sedraImage");
+      // const aercTextElement = document.getElementById("#aercText");
+      // const aercImageElement = document.getElementById("aercImage");
+      // const overlay = document.createElement("div");
+      // overlay.className = "overlay";
+      // //toggles the specific example image when clicked
+      // function toggleImage(x) {
+      //   switch (x) {
+      //     case 1:
+      //       if (sedraImageElement.style.display === "none") {
+      //         sedraImageElement.style.display = "block";
+      //       } else {
+      //         sedraImageElement.style.display = "none";
+      //       }
+      //       toggleOverlay();
+      //       break;
+      //     case 2:
+      //       if (aercImageElement.style.display === "none") {
+      //         aercImageElement.style.display = "block";
+      //       } else {
+      //         aercImageElement.style.display = "none";
+      //       }
+      //       toggleOverlay();
+      //       break;
+      //   }
+      // }
+      //places overlay when example image is opened
+      // function toggleOverlay() {
+      //   overlay.style.display =
+      //     overlay.style.display === "none" ? "block" : "none";
+      // }
+      // //checks for click on either example text
+      // sedraTextElement.addEventListener("click", function () {
+      //   event.stopPropagation(); //prevents click closing image
+      //   toggleImage(1);
+      // });
+      // aercTextElement.addEventListener("click", function () {
+      //   event.stopPropagation(); //prevents click closing image
+      //   toggleImage(2);
+      // });
+      // //closes example image on any click
+      // document.addEventListener("click", function () {
+      //   if (
+      //     sedraImageElement.style.display != "none" ||
+      //     aercImageElement.style.display != "none"
+      //   ) {
+      //     toggleOverlay();
+      //   }
+      //   sedraImageElement.style.display = "none";
+      //   aercImageElement.style.display = "none";
+      // });
+      // document.body.appendChild(overlay);
+
+      // const fileList = document.querySelector("#file-list");
+      // //takes files dropped in dotted file box and adds to submission files list
+      // function drophandler(event) {
+      //   event.preventDefault();
+
+      //   const files = [];
+      //   if (event.dataTransfer.items) {
+      //     [...event.dataTransfer.items].forEach((item, i) => {
+      //       if (item.kind === "file") {
+      //         files.push(item.getAsFile());
+      //       }
+      //     });
+      //   }
+      //   handleFiles(files);
+      // }
+      // function dragover(event) {
+      //   event.preventDefault();
+      // }
+      //interacts with and sets up device camera
+      const captureButton = document.getElementById("capture-photo");
+      const cameraModal = document.getElementById("camera-modal");
+      const cameraFeed = document.getElementById("camera-feed");
+      const photoCanvas = document.getElementById("photo-canvas");
+      let mediaStream; // Declare mediaStream variable
+      async function initCamera() {
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          cameraFeed.srcObject = mediaStream;
+        } catch (error) {
+          console.error("Error accessing camera:", error);
+        }
+      }
+      function capturePhoto() {
+        const context = photoCanvas.getContext("2d");
+        photoCanvas.width = cameraFeed.videoWidth;
+        photoCanvas.height = cameraFeed.videoHeight;
+        context.drawImage(
+          cameraFeed,
+          0,
+          0,
+          cameraFeed.videoWidth,
+          cameraFeed.videoHeight
+        );
+      }
+      document.getElementById("close-camera").addEventListener("click", () => {
+        mediaStream.getTracks().forEach((track) => {
+          track.stop(); // Stop the camera feed
+        });
+        cameraModal.style.display = "none"; // Hide the camera modal
+      });
+      photoButton.addEventListener("click", () => {
+        cameraModal.style.display = "block"; // Show the camera modal
+        initCamera(); // Initialize the camera feed
+      });
+      document.getElementById("take-photo").addEventListener("click", () => {
+        capturePhoto();
+        mediaStream.getTracks().forEach((track) => {
+          track.stop(); // Stop the camera feed
+        });
+        cameraModal.style.display = "none"; // Hide the camera modal
+      });
+      //sets up submit button to send files to backend
+      // const upload = document.getElementById("file-upload");
+      // const submitButton = upload.querySelector('input[type = "submit"]');
+      // upload.addEventListener("submit", (event) => {
+      //   const formData = new FormData(upload);
+      //   fetch("endpoint", {
+      //     method: "POST",
+      //   });
+      // });
+      // //displays file names for the user as they are added
+      // function handleFiles(files) {
+      //   for (const file of files) {
+      //     const listItem = document.createElement("li");
+      //     listItem.textContent = file.name;
+      //     fileList.appendChild(listItem);
+      //   }
+      //   submitButton.style.display = "block";
+      // }
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
