@@ -10,11 +10,11 @@ from PIL import Image
 import numeralRecognition
 
 # load image
-img = Image.open("IOS-Score-Card/src/neuralNetwork/tests/img10.png")
+img = Image.open("python/generated/img12.png")
 img = img.convert("L")
 
 model = numeralRecognition.CNN()
-model.load_state_dict(torch.load("IOS-Score-Card/src/neuralNetwork/scorecardCNN.pt"))
+model.load_state_dict(torch.load("src/neuralNetwork/scorecardCNN.pt"))
 
 transform = transforms.ToTensor()
 

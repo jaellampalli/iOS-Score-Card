@@ -14,7 +14,7 @@ newBound = [[0,0],[1000,0],[0,500],[1000,500]]
 #img = cv2.imread("testingDocument.png")
 #img = cv2.imread("tracedSample1.jpg")
 #img = cv2.imread("BlackAdditionSample.png")
-img = cv2.imread("./goodScan.jpg")
+img = cv2.imread("python/goodScan.jpg")
 
 
 
@@ -231,11 +231,15 @@ for t in range(len(section)-1):
                 #finalimg = np.invert(finalimg)
                 #makes image MNIST size
                 finalimg = cv2.resize(finalimg,(28,28))
-                plt.imshow(finalimg , cmap = 'binary')
+
+                finalimg = cv2.erode(finalimg, np.ones((2, 2), np.uint8), iterations=1)
+
+                (thresh, finalimg) = cv2.threshold(finalimg, 100, 255, cv2.THRESH_BINARY)
+
+                plt.imshow(finalimg, cmap = 'binary_r')
                 plt.show()
-                #invert because otherwise text is white and background is black
                 
-                cv2.imwrite('./generated/img'+str(i)+'.png',finalimg)
+                cv2.imwrite('python/generated/img'+str(i)+'.png',finalimg)
                 i+=1
         
 
