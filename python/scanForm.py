@@ -108,6 +108,18 @@ def order_points(pts):
     # Return the ordered coordinates.
     return rect.astype('int').tolist()
 
+def zeroRowCount(img):
+    count = 0
+
+    for i in range (28):
+        for j in range (28):
+            if img[i][j] != 0:
+                break
+            if j == 27:
+                count += 1
+
+    return count
+
 pts = order_points(corners)
 
 (tl, tr, br, bl) = pts
@@ -235,6 +247,9 @@ for t in range(len(section)-1):
                 finalimg = cv2.erode(finalimg, np.ones((2, 2), np.uint8), iterations=1)
 
                 (thresh, finalimg) = cv2.threshold(finalimg, 100, 255, cv2.THRESH_BINARY)
+
+                if zeroRowCount(finalimg) > 21:
+                    continue
 
                 plt.imshow(finalimg, cmap = 'binary_r')
                 plt.show()
