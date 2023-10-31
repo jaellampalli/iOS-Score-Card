@@ -81,16 +81,8 @@
         <!-- TODO: Convert to Django -->
 
         {% include 'partials/form.html'%}
-
-        <button id="photoButton">Take a Photo</button>
-        <div id="camera-modal" class="modal">
-          <div class="modal-content">
-            <h2>Camera</h2>
-            <video id="camera-feed" autoplay></video>
-            <button id="close-camera">Close</button>
-            <button id="take-photo">Take Photo</button>
-          </div>
-        </div>
+        
+        {% include 'partials/camera.html'%}
       </div>
     </div>
 
