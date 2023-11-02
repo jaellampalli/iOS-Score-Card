@@ -56,6 +56,15 @@ def align_image_to_self(image, maxFeatures=500, keepPercent=0.2, debug=False):
 
     return binary_aligned_image
 
+def remove_horizontal_lines(image):
+    # Create a horizontal kernel for morphological operations
+    kernel = np.ones((2, 1), np.uint8)
+
+    # Perform morphological closing to remove horizontal lines
+    image_no_lines = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
+
+    return image_no_lines
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("-i", "--image", required=True,
@@ -76,64 +85,85 @@ if __name__ == "__main__":
     original_resized_gray = cv2.resize(original_gray, (rotated_aligned_resized.shape[1], rotated_aligned_resized.shape[0]))
 
     # Perform OCR on the aligned binary image to extract text
-    aligned_text = pytesseract.image_to_string(rotated_aligned_resized)
+    aligned_text = pytesseract.image_to_string(original_resized_gray)
 
     # Print the extracted text from the aligned image
     print("Aligned Image Text:")
     print(aligned_text)
 
+    # Export the extracted text to a text file
+    output_text_filename = args["image"].replace(".jpg", "_output.txt")
+    with open(output_text_filename, "w") as text_file:
+        text_file.write(aligned_text)
+
+
     # Rotate the images to display them in landscape view
     original_resized_gray_landscape = cv2.rotate(original_resized_gray, cv2.ROTATE_90_COUNTERCLOCKWISE)
     rotated_aligned_resized_landscape = cv2.rotate(rotated_aligned_resized, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
+    # Remove horizontal lines from the aligned image
+    rotated_aligned_resized_no_lines = remove_horizontal_lines(rotated_aligned_resized_landscape)
+
     # Combine the images horizontally using hstack
-    combined_image = np.hstack([original_resized_gray_landscape, rotated_aligned_resized_landscape])
+    combined_image = np.hstack([original_resized_gray_landscape, rotated_aligned_resized_no_lines])
 
     # Create a window and add scrollbars
     window_name = "Comparison (Landscape View)"
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-    cv2.createTrackbar("Horizontal Scroll", window_name, 0, combined_image.shape[1] - rotated_aligned_resized_landscape.shape[1], lambda x: None)
-    cv2.createTrackbar("Vertical Scroll", window_name, 0, combined_image.shape[0] - rotated_aligned_resized_landscape.shape[0], lambda x: None)
+    cv2.createTrackbar("Horizontal Scroll", window_name, 0, combined_image.shape[1] - rotated_aligned_resized_no_lines.shape[1], lambda x: None)
+    cv2.createTrackbar("Vertical Scroll", window_name, 0, combined_image.shape[0] - rotated_aligned_resized_no_lines.shape[0], lambda x: None)
     cv2.createTrackbar("Zoom", window_name, 100, 200, lambda x: None)
 
     # Save the rotated and aligned image to the same folder as the input image
     output_filename = args["image"].replace(".jpg", "_output.jpg")
     cv2.imwrite(output_filename, rotated_aligned_resized_landscape)
 
-    # Save the rotated and aligned image to the same folder as the input image
-    output_filename = args["image"].replace(".jpg", "_output.jpg")
-    cv2.imwrite(output_filename, rotated_aligned_resized_landscape)
-    
+    # Save the rotated and aligned image with horizontal lines removed
+    output_filename_no_lines = args["image"].replace(".jpg", "_output_no_lines.jpg")
+    cv2.imwrite(output_filename_no_lines, rotated_aligned_resized_no_lines)
+
+    # Perform OCR on the aligned binary image to extract text
+    aligned_text = pytesseract.image_to_string(rotated_aligned_resized_no_lines)
+
+    # Print the extracted text from the aligned image
+    print("Lines removed Image Text:")
+    print(aligned_text)
+
+    # Export the extracted text to a text file
+    output_text_filename = args["image"].replace(".jpg", "_LinesRemovedoutput.txt")
+    with open(output_text_filename, "w") as text_file:
+        text_file.write(aligned_text)
+
     # Display a message box to notify that the output image has been exported
     root = tk.Tk()
     root.withdraw()  # Hide the main window
     messagebox.showinfo("Image Exported", f"The images are shown side by side here. Use scrollbars to view them. \n\nAlso, the output image has been exported to:\n{output_filename}")
 
-while True:
-    # Get scrollbar positions
-    h_scroll = cv2.getTrackbarPos("Horizontal Scroll", window_name)
-    v_scroll = cv2.getTrackbarPos("Vertical Scroll", window_name)
-    zoom = cv2.getTrackbarPos("Zoom", window_name) / 100
+    while True:
+        # Get scrollbar positions
+        h_scroll = cv2.getTrackbarPos("Horizontal Scroll", window_name)
+        v_scroll = cv2.getTrackbarPos("Vertical Scroll", window_name)
+        zoom = cv2.getTrackbarPos("Zoom", window_name) / 100
 
-    # Calculate the size of the view with zoom
-    view_height = int(rotated_aligned_resized_landscape.shape[0] * zoom)
-    view_width = int(rotated_aligned_resized_landscape.shape[1] * zoom)
+        # Calculate the size of the view with zoom
+        view_height = int(rotated_aligned_resized_no_lines.shape[0] * zoom)
+        view_width = int(rotated_aligned_resized_no_lines.shape[1] * zoom)
 
-    # Create a view of the combined image based on scrollbar positions and zoom
-    view = combined_image[v_scroll:v_scroll+view_height, h_scroll:h_scroll+view_width]
+        # Create a view of the combined image based on scrollbar positions and zoom
+        view = combined_image[v_scroll:v_scroll+view_height, h_scroll:h_scroll+view_width]
 
-    # Resize the view for display
-    display_view = cv2.resize(view, (rotated_aligned_resized_landscape.shape[1], rotated_aligned_resized_landscape.shape[0]))
+        # Resize the view for display
+        display_view = cv2.resize(view, (rotated_aligned_resized_no_lines.shape[1], rotated_aligned_resized_no_lines.shape[0]))
 
-    # Display the view in the window
-    cv2.imshow(window_name, display_view)
+        # Display the view in the window
+        cv2.imshow(window_name, display_view)
 
-    key = cv2.waitKey(1) & 0xFF
-    if key == 27:  # Press Esc to exit
-        break
+        key = cv2.waitKey(1) & 0xFF
+        if key == 27:  # Press Esc to exit
+            break
 
-    # Check if the window was closed using the X button
-    if cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) < 1:
-        break
+        # Check if the window was closed using the X button
+        if cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) < 1:
+            break
 
-cv2.destroyAllWindows()
+    cv2.destroyAllWindows()
