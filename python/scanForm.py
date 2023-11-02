@@ -49,32 +49,35 @@ plt.show()
 #     #cv2.circle(img,tuple_point,3,(0,0,255),4)
 #     p.append(tuple_point)
 
-
 # corners = p
 
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (100, 100))
+img_morph = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
+
+plt.imshow(img_morph)
+plt.show()
+
+gray = cv2.cvtColor(img_morph, cv2.COLOR_BGR2GRAY)
 gray = cv2.GaussianBlur(gray, (21, 21), 2)
+
 # Edge Detection.
 canny = cv2.Canny(gray, 0, 150)
 canny = cv2.dilate(canny, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (13, 13)))
 
-
 # Blank canvas.
-con = np.zeros_like(img)
+con = np.zeros_like(img_morph)
 # Finding contours for the detected edges.
 contours, hierarchy = cv2.findContours(canny, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 # Keeping only the largest detected contour.
 page = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
 con = cv2.drawContours(con, page, -1, (0, 255, 255), 3)
 
-
-
 closing = cv2.morphologyEx(con, cv2.MORPH_CLOSE, (25,25),iterations=5)
 # plt.imshow(closing, cmap = "binary")
 # plt.show()
 
 # Blank canvas.
-con = np.zeros_like(img)
+con = np.zeros_like(img_morph)
 # Loop over the contours.
 for c in page:
   # Approximate the contour.
@@ -85,9 +88,39 @@ for c in page:
       break
 cv2.drawContours(con, c, -1, (0, 255, 255), 3)
 cv2.drawContours(con, corners, -1, (0, 255, 0), 10)
+
+for corner in corners:
+    x, y = corner.ravel()
+    cv2.circle(img,(int(x),int(y)),50,(36,255,12),-1)
+
+plt.imshow(img)
+plt.show()
+
+x1, y1 = corners[1].ravel()
+x2, y2 = corners[2].ravel()
+
+angle = -int(math.degrees(math.atan((float(y2) - float(y1)) / (float(x2) - float(x1)))))
+
+(h, w) = img.shape[:2]
+(x, y) = (w / 2, h / 2)
+
+M = cv2.getRotationMatrix2D((x, y), -angle, 1.0)
+cos = np.abs(M[0, 0])
+sin = np.abs(M[0, 1])
+
+nW = int((h * sin) + (w * cos))
+nH = int((h * cos) + (w * sin))
+
+M[0, 2] += (nW / 2) - x
+M[1, 2] += (nH / 2) - y
+
+img = cv2.warpAffine(img, M, (nW, nH))
+
+plt.imshow(img)
+plt.show()
+
 # Sorting the corners and converting them to desired shape.
 corners = sorted(np.concatenate(corners).tolist())
-
 
 def order_points(pts):
     '''Rearrange coordinates to order:

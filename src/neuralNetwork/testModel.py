@@ -10,7 +10,7 @@ from PIL import Image
 import numeralRecognition
 
 # load image
-img = Image.open("python/generated/img12.png")
+img = Image.open("python/generated/img1.png")
 img = img.convert("L")
 
 model = numeralRecognition.CNN()
