@@ -25,7 +25,7 @@
                 .then(mediaStream => {
                     cameraFeed.srcObject = mediaStream;
                 });
-                inter = setInterval(()=>{document.dispatchEvent(new CustomEvent("imageCap"))},5000)
+                inter = setInterval(()=>{document.dispatchEvent(new CustomEvent("imageCap"))},500)
             } 
             function capturePhoto() {
                 const context = photoCanvas.getContext('2d');

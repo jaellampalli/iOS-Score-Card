@@ -1,6 +1,7 @@
 from channels.generic.websocket import WebsocketConsumer
 import json
 from django.template.loader import get_template
+from .scanForm import scanData , docFind
 
 class CameraConsumer(WebsocketConsumer):
     def connect(self):
@@ -9,15 +10,18 @@ class CameraConsumer(WebsocketConsumer):
             'type':'connection_established',
             'message':'poggers, connected'}))
     def receive(self, text_data= None):
-        print(json.dumps(text_data))
+        data = json.loads(text_data)['test'].split(',')[1]
         
-        html = get_template("partials/display.html").render(
-            context = {
-                'val': 'testing'
-            }
-        )
-        self.send(text_data=html)
-
+        if(docFind(data)):
+            scanData(data)
+            html = get_template("partials/display.html").render(
+                context = {
+                    'val': 'testing'
+                }
+            )
+            self.send(text_data=html)
+            print("document found")
+        print("no document found")
     
     def disconnect(self, close_code):
         pass
