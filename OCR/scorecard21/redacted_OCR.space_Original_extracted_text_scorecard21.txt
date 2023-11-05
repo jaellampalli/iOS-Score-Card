@@ -1,0 +1,5 @@
+Label: Full Page (Redacted with 1 lines retained)
+Target Format: [0-9]{1}
+Value: Standing. Fratiation
+Recovery (Score 1-10)|
+Hydration (Score 1-10)|

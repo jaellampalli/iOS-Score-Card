@@ -1,0 +1,5 @@
+Label: Full Page (Redacted with 1 lines retained)
+Target Format: [0-9]{3}
+Value: TOTAL PENALTY POINTS. 3.5
+FINAL SCORE 92:5
+TOTAL THIS CARDs

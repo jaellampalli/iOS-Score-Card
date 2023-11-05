@@ -1,0 +1,2 @@
+Label: IT
+Value: 50

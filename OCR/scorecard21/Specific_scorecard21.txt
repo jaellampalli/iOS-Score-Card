@@ -1,0 +1,3 @@
+Label: Recovery
+Target Format: [0-9]{1}
+Value: 110

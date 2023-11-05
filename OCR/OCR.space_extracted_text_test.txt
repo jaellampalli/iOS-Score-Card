@@ -1,0 +1,13 @@
+Label: Full Page
+Value: FORM 1
+MATHS
+ENGLISH
+SCIENCE
+SOCIAL
+IT
+TOTAL
+50
+24
+3
+2
+80

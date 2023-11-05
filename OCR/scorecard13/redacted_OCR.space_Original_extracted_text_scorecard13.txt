@@ -1,0 +1,6 @@
+Label: Full Page (Redacted with 1 lines retained)
+Target Format: [0-9]{2}
+Value: PULSE AND CARDIAC RECOVERT INUEA -IV FUNSEE.
+INITIAL PULSE.**(Deduct t Point for every 2 Deats over ESTABLISHED PARAMETERS)
+BEFORE TROT OUT (Maximum Points • 5)
+AFTER TROT CUT

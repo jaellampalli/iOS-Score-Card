@@ -1,0 +1,2 @@
+Label: Total this card
+Value: 92.5
