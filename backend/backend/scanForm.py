@@ -45,7 +45,7 @@ def docFind(imgData):
     else:
         return False
 
-def scanData(imgData):
+def warpDocument(imgData):
 
     newBound = [[0,0],[1000,0],[0,500],[1000,500]]
 
@@ -55,15 +55,14 @@ def scanData(imgData):
     # img = cv2.imread("./goodScan.jpg")
 
 
-    plt.imshow(img)
-    plt.show()
+    # plt.imshow(img)
+    # plt.show()
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (21, 21), 2)
     # Edge Detection.
     canny = cv2.Canny(gray, 0, 150)
     canny = cv2.dilate(canny, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (13, 13)))
-
 
     # Blank canvas.
     con = np.zeros_like(img)
@@ -72,8 +71,6 @@ def scanData(imgData):
     # Keeping only the largest detected contour.
     page = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
     con = cv2.drawContours(con, page, -1, (0, 255, 255), 3)
-
-
 
     closing = cv2.morphologyEx(con, cv2.MORPH_CLOSE, (25,25),iterations=5)
     # plt.imshow(closing, cmap = "binary")
@@ -92,8 +89,8 @@ def scanData(imgData):
     cv2.drawContours(con, c, -1, (0, 255, 255), 3)
     cv2.drawContours(con, corners, -1, (0, 255, 0), 10)
 
-    plt.imshow(con)
-    plt.show()
+    # plt.imshow(con)
+    # plt.show()
     # Sorting the corners and converting them to desired shape.
     corners = sorted(np.concatenate(corners).tolist())
 
@@ -137,6 +134,16 @@ def scanData(imgData):
     M = cv2.getPerspectiveTransform(np.float32(pts), np.float32(destination_corners))
     # Perspective transform using homography.
     fimg = cv2.warpPerspective(img, M, (maxWidth,maxHeight), flags=cv2.INTER_LINEAR)
+
+    _, im_arr = cv2.imencode('.png', fimg)  # im_arr: image in Numpy one-dim array format.
+    im_bytes = im_arr.tobytes()
+    im_b64 = str(base64.b64encode(im_bytes)).split("'")[1]
+
+    return im_b64
+
+#TODO fix warpDocument
+def scanData(fimg):
+
 
     plt.imshow(fimg)
     plt.show()

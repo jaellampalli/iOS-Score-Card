@@ -1,5 +1,17 @@
 
 
+<div id="modals-here"
+    class="modal modal-blur fade"
+    style="display: none"
+    aria-hidden="false"
+    tabindex="-1"
+    hx-swap-oob="innerHTML"
+    >
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content"></div>
+    </div>
+</div>
+
 <button id="photoButton" onclick='initCamera();cameraModal.style.display = "block";'>Take a Photo</button>
         <div id="camera-modal" class="modal" hx-ext="ws" ws-connect="/ws/camera">
           <div class="modal-content">
